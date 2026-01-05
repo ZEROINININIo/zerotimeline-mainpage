@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TIME OBJ(BEFORE) // ZEROXV</title>
+    <link rel="icon" href="https://q.qlogo.cn/headimg_dl?dst_uin=1660452904&spec=640&img_type=jpg" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              alim: ['"AliM"', 'sans-serif'],
+              mono: ['"AliM"', 'monospace'], 
+            },
+            colors: {
+              'void-black': '#000000',
+              'void-dark': '#0a0a0a',
+              'void-gray': '#52525b',
+              'void-light': '#e4e4e7',
+              'void-white': '#ffffff',
+              // Adding ash colors referenced in components to ensure UI consistency
+              'ash-black': '#000000',
+              'ash-dark': '#0a0a0a',
+              'ash-gray': '#52525b',
+              'ash-light': '#e4e4e7',
+              'ash-white': '#ffffff',
+            },
+            animation: {
+              'glitch': 'glitch 1s linear infinite',
+              'scanline': 'scanline 8s linear infinite',
+              'fade-in': 'fadeIn 0.8s ease-out forwards',
+              'spin-slow': 'spin 12s linear infinite',
+              'float': 'float 6s ease-in-out infinite',
+              'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'grain': 'grain 8s steps(10) infinite',
+            },
+            keyframes: {
+              glitch: {
+                '2%, 64%': { transform: 'translate(2px,0) skew(0deg)' },
+                '4%, 60%': { transform: 'translate(-2px,0) skew(0deg)' },
+                '62%': { transform: 'translate(0,0) skew(5deg)' },
+              },
+              scanline: {
+                '0%': { transform: 'translateY(-100%)' },
+                '100%': { transform: 'translateY(100%)' }
+              },
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' }
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' }
+              },
+              grain: {
+                '0%, 100%': { transform: 'translate(0, 0)' },
+                '10%': { transform: 'translate(-5%, -10%)' },
+                '20%': { transform: 'translate(-15%, 5%)' },
+                '30%': { transform: 'translate(7%, -25%)' },
+                '40%': { transform: 'translate(-5%, 25%)' },
+                '50%': { transform: 'translate(-15%, 10%)' },
+                '60%': { transform: 'translate(15%, 0%)' },
+                '70%': { transform: 'translate(0%, 15%)' },
+                '80%': { transform: 'translate(3%, 35%)' },
+                '90%': { transform: 'translate(-10%, 10%)' }
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      @font-face {
+        font-family: 'AliM';
+        src: url('/02.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      :root {
+        --background: #000000;
+        --foreground: #ffffff;
+        --grid-color: #27272a;
+      }
+      
+      body {
+        background-color: var(--background);
+        color: var(--foreground);
+        font-family: 'AliM', sans-serif;
+        overflow-x: hidden;
+        /* Removed filter: grayscale(100%) to fix position: fixed behavior */
+      }
+
+      /* Custom Selection Color */
+      ::selection {
+        background: #ffffff;
+        color: #000000;
+      }
+
+      /* Cursor Hiding logic controlled by CustomCursor component */
+      body.custom-cursor-active, 
+      body.custom-cursor-active * {
+        cursor: none !important;
+      }
+
+      /* CRT Scanline Overlay */
+      body.crt-enabled::before {
+        content: " ";
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(
+          to bottom,
+          rgba(255,255,255,0),
+          rgba(255,255,255,0) 50%,
+          rgba(0,0,0,0.2) 50%,
+          rgba(0,0,0,0.2)
+        );
+        background-size: 100% 4px;
+        z-index: 9998;
+        pointer-events: none;
+        animation: scanline 8s linear infinite;
+        opacity: 0.3;
+      }
+
+      /* Grain Filter Overlay */
+      .grain-overlay {
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 9997;
+        opacity: 0.4;
+        animation: grain 8s steps(10) infinite;
+        mix-blend-mode: overlay;
+      }
+
+      /* Grid Background */
+      .bg-grid-hard {
+        background-image: 
+          linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+          linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+        background-size: 40px 40px;
+        mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+      }
+
+      /* Glitch Text Effect - Monochrome */
+      .glitch-text-heavy {
+        position: relative;
+      }
+      .glitch-text-heavy::before,
+      .glitch-text-heavy::after {
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--background);
+      }
+      .glitch-text-heavy::before {
+        left: 2px;
+        text-shadow: -1px 0 #888;
+        clip: rect(44px, 450px, 56px, 0);
+        animation: glitch-anim-1 5s infinite linear alternate-reverse;
+      }
+      .glitch-text-heavy::after {
+        left: -2px;
+        text-shadow: -1px 0 #fff;
+        clip: rect(44px, 450px, 56px, 0);
+        animation: glitch-anim-2 5s infinite linear alternate-reverse;
+      }
+      @keyframes glitch-anim-1 {
+        0% { clip: rect(30px, 9999px, 10px, 0); }
+        20% { clip: rect(80px, 9999px, 90px, 0); }
+        40% { clip: rect(10px, 9999px, 50px, 0); }
+        60% { clip: rect(60px, 9999px, 20px, 0); }
+        80% { clip: rect(20px, 9999px, 80px, 0); }
+        100% { clip: rect(90px, 9999px, 30px, 0); }
+      }
+      @keyframes glitch-anim-2 {
+        0% { clip: rect(10px, 9999px, 80px, 0); }
+        20% { clip: rect(60px, 9999px, 10px, 0); }
+        40% { clip: rect(40px, 9999px, 50px, 0); }
+        60% { clip: rect(80px, 9999px, 90px, 0); }
+        80% { clip: rect(20px, 9999px, 40px, 0); }
+        100% { clip: rect(50px, 9999px, 20px, 0); }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
