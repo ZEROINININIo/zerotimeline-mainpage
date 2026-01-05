@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Terminal, ExternalLink, Cpu, Code2, Tv, Zap, BookOpen, Disc, Layers, ArrowRight, Lock, AlertTriangle, Infinity } from 'lucide-react';
+import { Terminal, ExternalLink, Cpu, Code2, Tv, Zap, BookOpen, Disc, Layers, ArrowRight, Lock, AlertTriangle, Infinity, Heart, X } from 'lucide-react';
 import Reveal from '../components/Reveal';
 
 // --- Dynamic Background Component ---
@@ -100,6 +100,11 @@ const CyberVoidBackground = () => {
 
 const HomePage: React.FC = () => {
   const [glitchTrigger, setGlitchTrigger] = useState(false);
+  
+  // --- Easter Egg States ---
+  const [showSecretInput, setShowSecretInput] = useState(false);
+  const [secretCommand, setSecretCommand] = useState('');
+  const [showLoveEgg, setShowLoveEgg] = useState(false);
 
   // Random glitch effect for avatar
   useEffect(() => {
@@ -109,6 +114,28 @@ const HomePage: React.FC = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleSecretSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+        const cmd = secretCommand.toLowerCase().trim();
+        // Check for various forms of "I like you"
+        const loveKeywords = [
+            '我喜欢你', '喜欢', '喜欢你', '我爱你', 
+            'i like you', 'like you', 'i love you', 'love', 
+            '好き', '大好き', 'je t\'aime', 'te amo'
+        ];
+
+        if (loveKeywords.some(k => cmd.includes(k))) {
+            setShowLoveEgg(true);
+            setShowSecretInput(false);
+            setSecretCommand('');
+        } else {
+            // Failed attempt closes it
+            setShowSecretInput(false);
+            setSecretCommand('');
+        }
+    }
+  };
 
   const avatarUrl = "https://q.qlogo.cn/headimg_dl?dst_uin=1660452904&spec=640&img_type=jpg";
   const biliUrl = "https://space.bilibili.com/348054218?spm_id_from=333.1007.0.0";
@@ -153,12 +180,37 @@ const HomePage: React.FC = () => {
         {/* Grid Overlay */}
         <div className="fixed inset-0 bg-grid-hard opacity-20 pointer-events-none"></div>
 
-        {/* Decoration Corners */}
+        {/* Decoration Corners & Secret Terminal */}
         <div className="fixed top-0 left-0 w-full h-full pointer-events-none p-4 md:p-8 z-20 flex flex-col justify-between">
             <div className="flex justify-between items-start">
-                <div className="text-[10px] font-alim text-void-gray">
-                    TIMELINE_PROTOCOL: SEQUENTIAL<br/>
-                    TARGET: ZEROXV
+                <div className="text-[10px] font-alim text-void-gray pointer-events-auto">
+                    {showSecretInput ? (
+                        <div className="flex items-center gap-1 bg-black/80 border border-void-gray/50 px-2 py-1 animate-fade-in">
+                            <span className="text-white animate-pulse">{'>'}</span>
+                            <input 
+                                autoFocus
+                                type="text"
+                                value={secretCommand}
+                                onChange={(e) => setSecretCommand(e.target.value)}
+                                onKeyDown={handleSecretSubmit}
+                                onBlur={() => {
+                                    // Small delay to allow enter key to process first if needed, or immediate close
+                                    if(!secretCommand) setShowSecretInput(false);
+                                }}
+                                className="bg-transparent border-none outline-none text-white w-32 font-mono uppercase placeholder-void-gray/50"
+                                placeholder="COMMAND..."
+                            />
+                        </div>
+                    ) : (
+                        <div 
+                            onClick={() => setShowSecretInput(true)}
+                            className="cursor-text hover:text-white transition-colors select-none"
+                            title="Terminal Access"
+                        >
+                            TIMELINE_PROTOCOL: SEQUENTIAL<br/>
+                            TARGET: ZEROXV
+                        </div>
+                    )}
                 </div>
                 <div className="flex gap-2">
                     <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
@@ -173,6 +225,41 @@ const HomePage: React.FC = () => {
                 <div className="w-16 h-1 bg-white/30"></div>
             </div>
         </div>
+
+        {/* --- Easter Egg Modal --- */}
+        {showLoveEgg && (
+            <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-8 animate-fade-in backdrop-blur-sm" onClick={() => setShowLoveEgg(false)}>
+                <div className="relative max-w-4xl max-h-full flex flex-col items-center" onClick={e => e.stopPropagation()}>
+                    <button 
+                        onClick={() => setShowLoveEgg(false)}
+                        className="absolute -top-12 right-0 p-2 text-white/50 hover:text-white transition-colors"
+                    >
+                        <X size={24} />
+                    </button>
+                    
+                    <div className="relative p-2 border-2 border-pink-500/30 bg-black/50 shadow-[0_0_50px_rgba(236,72,153,0.2)] animate-scale-in">
+                        <img 
+                            src="https://cdn.picui.cn/vip/2026/01/05/695bd4f1c5335.png" 
+                            alt="Surprise" 
+                            className="max-h-[80vh] w-auto object-contain block"
+                        />
+                        {/* Decorative Hearts Overlay */}
+                        <div className="absolute -top-4 -left-4 text-pink-500 animate-bounce delay-100">
+                            <Heart size={32} fill="currentColor" />
+                        </div>
+                        <div className="absolute -bottom-4 -right-4 text-pink-500 animate-bounce delay-300">
+                            <Heart size={32} fill="currentColor" />
+                        </div>
+                        
+                        <div className="absolute bottom-4 left-0 right-0 text-center">
+                            <span className="bg-black/70 text-pink-300 px-4 py-1 text-xs font-mono tracking-widest border border-pink-500/50 backdrop-blur-md">
+                                SECRET_UNLOCKED // 
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
 
         {/* --- Content Container --- */}
         {/* Strictly Reduced Padding to fix blank tail: pb-6 lg:pb-8 */}

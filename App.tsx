@@ -23,7 +23,7 @@ const App: React.FC = () => {
       {/* Top Controls */}
       <div className="fixed top-4 right-4 z-50 flex gap-4">
         <div className="hidden md:block px-3 py-2 border border-void-gray/30 bg-black/50 backdrop-blur-sm text-[10px] text-void-gray font-alim">
-            SYS.VER: TL.2.0.7-A
+            SYS.VER: TL.2.0.8-A
         </div>
         <CRTToggle value={crtEnabled} onChange={setCrtEnabled} />
       </div>
